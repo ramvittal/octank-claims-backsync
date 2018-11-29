@@ -25,7 +25,7 @@ public class Staff implements java.io.Serializable {
 	private String gender;
 	private String staffName;
 	private Date staffBirthDate;
-	private Set claims = new HashSet(0);
+	private Set<Claim> claims = new HashSet<Claim>(0);
 
 	public Staff() {
 	}
@@ -35,7 +35,7 @@ public class Staff implements java.io.Serializable {
 	}
 
 	public Staff(String staffId, String staffCategory, String gender, String staffName, Date staffBirthDate,
-			Set claims) {
+			Set<Claim> claims) {
 		this.staffId = staffId;
 		this.staffCategory = staffCategory;
 		this.gender = gender;
@@ -93,11 +93,11 @@ public class Staff implements java.io.Serializable {
 	}
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "staff")
-	public Set getClaims() {
+	public Set<Claim> getClaims() {
 		return this.claims;
 	}
 
-	public void setClaims(Set claims) {
+	public void setClaims(Set<Claim> claims) {
 		this.claims = claims;
 	}
 

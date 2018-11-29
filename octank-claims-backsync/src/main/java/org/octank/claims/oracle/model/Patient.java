@@ -29,7 +29,7 @@ public class Patient implements java.io.Serializable {
 	private String patientState;
 	private String patientZip;
 	private String patientCountry;
-	private Set claims = new HashSet(0);
+	private Set<Claim> claims = new HashSet<Claim>(0);
 
 	public Patient() {
 	}
@@ -39,7 +39,7 @@ public class Patient implements java.io.Serializable {
 	}
 
 	public Patient(String patientId, String gender, Date dateOfBirth, String patientName, String patientAddress,
-			String patientCity, String patientState, String patientZip, String patientCountry, Set claims) {
+			String patientCity, String patientState, String patientZip, String patientCountry, Set<Claim> claims) {
 		this.patientId = patientId;
 		this.gender = gender;
 		this.dateOfBirth = dateOfBirth;
@@ -137,11 +137,11 @@ public class Patient implements java.io.Serializable {
 	}
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "patient")
-	public Set getClaims() {
+	public Set<Claim> getClaims() {
 		return this.claims;
 	}
 
-	public void setClaims(Set claims) {
+	public void setClaims(Set<Claim> claims) {
 		this.claims = claims;
 	}
 

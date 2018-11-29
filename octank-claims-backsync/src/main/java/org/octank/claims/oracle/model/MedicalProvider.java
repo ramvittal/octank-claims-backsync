@@ -24,7 +24,7 @@ public class MedicalProvider implements java.io.Serializable {
 	private String medicalProviderState;
 	private String medicalProviderZip;
 	private String medicalProviderCountry;
-	private Set claims = new HashSet(0);
+	private Set<Claim> claims = new HashSet<Claim>(0);
 
 	public MedicalProvider() {
 	}
@@ -35,7 +35,7 @@ public class MedicalProvider implements java.io.Serializable {
 
 	public MedicalProvider(String medicalProviderId, String medicalProviderName, String medicalProviderAddress,
 			String medicalProviderCity, String medicalProviderState, String medicalProviderZip,
-			String medicalProviderCountry, Set claims) {
+			String medicalProviderCountry, Set<Claim> claims) {
 		this.medicalProviderId = medicalProviderId;
 		this.medicalProviderName = medicalProviderName;
 		this.medicalProviderAddress = medicalProviderAddress;
@@ -112,11 +112,11 @@ public class MedicalProvider implements java.io.Serializable {
 	}
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "medicalProvider")
-	public Set getClaims() {
+	public Set<Claim> getClaims() {
 		return this.claims;
 	}
 
-	public void setClaims(Set claims) {
+	public void setClaims(Set<Claim> claims) {
 		this.claims = claims;
 	}
 
