@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda function to backsync claim status to oracle db
+Resources:
+  ClaimsProcessor:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ClaimsBacksync
+      Handler: org.octank.claims.oracle.main.ClaimsBacksyncHandler
+      Runtime: java8
+      CodeUri: s3://octank-healthcare/octank-claims-backsync-1.0-SNAPSHOT.jar
+      Description: Backsync Claims
+      Timeout: 30
+      MemorySize: 1024
+      VpcConfig: # For accessing RDS instance
+        SecurityGroupIds:
+          - sg-019cfb0716e6f65ab
+        SubnetIds:
+          - subnet-be396bc7
+      Environment:
+        Variables:
+          RDS_HOSTNAME: 52.33.108.133:1521:orcl
+          RDS_DB_NAME: CLAIMS
+          RDS_USERNAME: claims
+          RDS_PASSWORD: claims123
+      Role: arn:aws:iam::716664005094:role/microServiceRole
