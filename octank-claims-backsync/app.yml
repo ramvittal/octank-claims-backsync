@@ -10,16 +10,17 @@ Resources:
       Runtime: java8
       CodeUri: s3://octank-healthcare/octank-claims-backsync-1.0-SNAPSHOT.jar
       Description: Backsync Claims
-      Timeout: 30
+      Timeout: 120
       MemorySize: 1024
       VpcConfig: # For accessing RDS instance
         SecurityGroupIds:
           - sg-019cfb0716e6f65ab
         SubnetIds:
           - subnet-be396bc7
+          - subnet-379ae67c 
       Environment:
         Variables:
-          RDS_HOSTNAME: 52.33.108.133:1521:orcl
+          RDS_HOSTNAME: 172.31.17.106:1521:orcl
           RDS_DB_NAME: CLAIMS
           RDS_USERNAME: claims
           RDS_PASSWORD: claims123

@@ -23,10 +23,16 @@ public class ClaimsBacksyncHandler implements RequestHandler<String, String> {
     @Override
     public String handleRequest(String request, Context context) {
     	
-        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+    	System.out.println("received request:" +request);
+    	
+    	if(request.trim().isEmpty()) {
+    		return request;
+    	}
+    	
+    	SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         
         
-        System.out.println("request:" +request);
+    	System.out.println("***got session object**");
         
         try (Session session = sessionFactory.openSession()) {
         	
