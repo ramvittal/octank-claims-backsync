@@ -1,6 +1,7 @@
 package org.octank.claims.oracle.main;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -12,6 +13,7 @@ import javax.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
+import org.hibernate.type.StandardBasicTypes;
 import org.octank.claims.oracle.model.Claim;
 import org.octank.claims.oracle.model.InsuranceCompany;
 import org.octank.claims.oracle.model.MedicalProvider;
@@ -24,9 +26,9 @@ public class ClaimsGenerator {
 	public static void main(String[] args) {
 		
 		BatchRequest request = new BatchRequest();
-		request.setCount(10);
+		request.setCount(1);
 		
-		request.setRequestId("CL-102-");
+		request.setRequestId("CL-102-2-");
 		request.setStatus("Submitted");
 		
 		Claim claim = new Claim();
@@ -35,7 +37,7 @@ public class ClaimsGenerator {
 		InsuranceCompany ic = new InsuranceCompany();
 		ic.setInsuranceCompanyId("IC102");
 		claim.setInsuranceCompany(ic);
-		claim.setInsurancePolicyNbr("IC102-102");
+		claim.setInsurancePolicyNbr("IC101-102");
 		
 		MedicalProvider mp = new MedicalProvider();
 		mp.setMedicalProviderId("MP102");
@@ -44,7 +46,7 @@ public class ClaimsGenerator {
 		
 		Patient p = new Patient();
 		
-		p.setPatientId("102");
+		p.setPatientId("101");
 		claim.setPatient(p);
 		
 		Staff s = new Staff();
@@ -57,9 +59,19 @@ public class ClaimsGenerator {
 		
 		request.setClaim(claim);
 		
+		//setupPatient(claim);
+		
 		generateClaims(request);
 		
 
+	}
+	
+	
+	public static void setupPatient(Claim claim)   {
+		
+		
+		
+		
 	}
 	
 	
@@ -80,19 +92,43 @@ public class ClaimsGenerator {
 				System.out.println("begin");
 				
 				
+				
+
+				String hql = "from Patient where patientName = :keyword";
+				
+				String keyword = "Aaron Davis";
+				Query query = sessionObj.createQuery(hql);
+				query.setParameter("keyword", keyword);
+			
+				List<Patient> lp = query.list();
+				
+				for (Patient p : lp) {
+					System.out.println(p.getPatientName());
+				}
+				
+				
 				for(int i=0; i < request.getCount(); i++ )
 				{
 					
+					
+					 query = 
+							sessionObj.createSQLQuery("select CLAIM_SEQ.nextval as num from dual")
+					            .addScalar("num", StandardBasicTypes.BIG_INTEGER);
+					
+					Long lc = ((BigInteger) query.uniqueResult()).longValue();
+					
+										
 					Claim c = request.getClaim();
 					c.setClaimStatus(request.getStatus());
-					c.setClaimId(request.getRequestId() + i);
+					c.setClaimId(lc.longValue()+"");
 					c.setUpdatedDate(new Date());
+					c.setMedicalCode("S02.10XA");
 					
-					sessionObj.save(c);
+					String gcid = (String) sessionObj.save(c);
 					sessionObj.flush();
 			        sessionObj.clear();
 			        
-			        System.out.println("saving claim:" +c.getClaimId());
+			        System.out.println("saving claim:"+c.getClaimId());
 				}
 
 				// Committing The Transactions To The Database

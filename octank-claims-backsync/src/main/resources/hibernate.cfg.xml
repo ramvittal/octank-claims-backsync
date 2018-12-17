@@ -5,8 +5,8 @@
 <hibernate-configuration>
     <session-factory>
           <property name="hibernate.connection.driver_class">oracle.jdbc.driver.OracleDriver</property>
-          <!-- use private ip 172.31.17.106 for deployment-->
-		  <property name="hibernate.connection.url">jdbc:oracle:thin:@52.33.108.133:1521:orcl</property>
+          <!-- use private ip 54.213.201.119 or 12.0.0.12 for deployment-->
+		  <property name="hibernate.connection.url">jdbc:oracle:thin:@12.0.0.12:1521:orcl</property>
 		  <property name="hibernate.connection.username">claims</property>
 		  <property name="hibernate.connection.password">claims123</property>
 		  <property name="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</property>
