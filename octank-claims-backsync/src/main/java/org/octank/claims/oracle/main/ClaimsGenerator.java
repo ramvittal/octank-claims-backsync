@@ -3,6 +3,7 @@ package org.octank.claims.oracle.main;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,11 +15,14 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hibernate.type.StandardBasicTypes;
+import org.octank.claims.api.model.APIClaim;
 import org.octank.claims.oracle.model.Claim;
 import org.octank.claims.oracle.model.InsuranceCompany;
 import org.octank.claims.oracle.model.MedicalProvider;
 import org.octank.claims.oracle.model.Patient;
 import org.octank.claims.oracle.model.Staff;
+
+import com.google.gson.Gson;
 
 
 public class ClaimsGenerator {
@@ -92,6 +96,37 @@ public class ClaimsGenerator {
 				System.out.println("begin");
 				
 				
+				String hql1 = "from Claim where updatedDate >= :from and updatedDate <= :to";
+				
+				
+				Query query1 = sessionObj.createQuery(hql1);
+				
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+				
+				Date from = sdf.parse("2018-12-17 00:00");
+				Date to = sdf.parse("2018-12-17 23:59");
+				
+				
+				query1.setParameter("from", from);
+				query1.setParameter("to", to);
+				
+				
+				List<Claim> lc1 = query1.list();
+				
+				List<APIClaim> acl = new ArrayList();
+				
+				for(Claim c : lc1) {
+					System.out.println(c.getClaimId());
+					//System.out.println(c.getPatient().getGender());
+					APIClaim ac = new APIClaim();
+					ac.setClaimId(c.getClaimId());
+					acl.add(ac);
+				}
+				
+				
+				String jsonCl = new Gson().toJson(acl);
+				
+				System.out.println(jsonCl);
 				
 
 				String hql = "from Patient where patientName = :keyword";

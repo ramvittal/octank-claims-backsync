@@ -8,6 +8,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -27,6 +30,7 @@ import org.octank.claims.oracle.model.Staff;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.google.gson.Gson;
 
 public class ClaimsApiHandler implements RequestStreamHandler {
 
@@ -89,6 +93,167 @@ public class ClaimsApiHandler implements RequestStreamHandler {
   		    writer.write(responseJson.toString());
   		    writer.close();
   		}
+	
+	
+	public void listClaims(
+	  		  InputStream inputStream, 
+	  		  OutputStream outputStream, 
+	  		  Context context)
+	  		  throws IOException {
+	  		 
+	  		    JSONParser parser = new JSONParser();
+	  		    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+	  		    JSONObject responseJson = new JSONObject();
+	  		    String claimNbr = null;
+	  		    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	  		  List<APIClaim>  jsonClaims=null;
+	  		 
+	  		 
+	  		    try {
+	  		        
+	  		    	System.out.println("before inputstream parse");
+	  		    	JSONObject event = (JSONObject) parser.parse(reader);
+	  		    	
+	  		    	
+	  		    	Date fromDate=null;
+	  		    	Date toDate=null; 
+	  		        
+	  		 
+	  		        if (event.get("queryStringParameters") != null) {
+	  		        	System.out.println("before queryString parse");
+	  		        	JSONObject qsp = (JSONObject) event.get("queryStringParameters");
+    		            if (qsp.get("fromDate") != null) {
+    		            	String sdate = (String)qsp.get("fromDate");
+    		            	 fromDate = sdf.parse(sdate);
+    		            }
+    		            
+    		            if (qsp.get("toDate") != null) {
+    		            	String sdate = (String)qsp.get("toDate");
+    		            	 toDate = sdf.parse(sdate);
+    		            	
+    		            }
+	  		            
+	  		            //call a method to list claims
+    		            jsonClaims = retreiveClaims(fromDate,toDate);
+	  		            
+	  		 
+	  		        }
+	  		        
+	  		         
+	  		 
+	  		        JSONObject responseBody = new JSONObject();
+	  		        
+	  		      if(jsonClaims != null)  {
+	  		    	
+	  		        responseBody.put("claims", jsonClaims);
+	  		      }
+	  		      else  {
+	  		    	  responseBody.put("message", "No Claims found");
+	  		      }
+	  		      
+	  		 
+	  		        JSONObject headerJson = new JSONObject();
+	  		        headerJson.put("x-custom-header", "my custom header value");
+	  		 
+	  		        responseJson.put("statusCode", 200);
+	  		        responseJson.put("headers", headerJson);
+	  		        responseJson.put("body", responseBody.toString());
+	  		 
+	  		    } catch (Exception pex) {
+	  		        responseJson.put("statusCode", 400);
+	  		        responseJson.put("exception", pex);
+	  		    }
+	  		 
+	  		    OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
+	  		    writer.write(responseJson.toString());
+	  		    writer.close();
+	  		}
+	
+	
+	private List<APIClaim> retreiveClaims(Date from, Date to) {
+		
+		System.out.println("in retreiveClaims");
+		
+		
+		List<APIClaim> acl = new ArrayList<APIClaim>();
+		
+		SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+		 Session sessionObj = null;
+		 List<String> jsonClaims=null;
+		 
+		 System.out.println("from:" +from);
+		 System.out.println("to:" +to);
+		 
+		 try {
+			 
+			 sessionObj = sessionFactory.openSession();
+			 
+			 
+			 String hql = "from Claim where updatedDate >= :from and updatedDate <= :to";
+				
+				
+				Query query = sessionObj.createQuery(hql);
+				
+				
+				
+				query.setParameter("from", from);
+				query.setParameter("to", to);
+				
+				
+			
+				List<Claim> lc = query.list();
+				
+				for (Claim c : lc) {
+					
+					System.out.println(c.getClaimId());
+					
+					APIClaim ac = new APIClaim();
+					ac.setClaimId(c.getClaimId());
+					ac.setAmountClaimed(c.getAmountClaimed().doubleValue());
+					ac.setClaimStatus(c.getClaimStatus());
+					ac.setMedicalCode(c.getMedicalCode());
+					ac.setUpdatedDate(c.getUpdatedDate());
+					ac.setInsurancePolicyNbr(c.getInsurancePolicyNbr());
+					ac.setInsuranceCompanyId(c.getInsuranceCompany().getInsuranceCompanyId());
+					ac.setGender(c.getPatient().getGender());
+					ac.setPatientAddress(c.getPatient().getPatientAddress());
+					ac.setPatientCity(c.getPatient().getPatientCity());
+					ac.setPatientState(c.getPatient().getPatientState());
+					ac.setPatientCountry(c.getPatient().getPatientCountry());
+					ac.setPatientDateOfBirth(c.getPatient().getDateOfBirth());
+					ac.setPatientName(c.getPatient().getPatientName());
+					ac.setMedicalProviderId(c.getMedicalProvider().getMedicalProviderId());
+					
+					
+					acl.add(ac);
+					
+				}
+			 
+				
+			 
+			 
+		 } catch(Exception sqlException) {
+				if(null != sessionObj.getTransaction()) {
+					System.out.println("\n.......Transaction Is Being Rolled Back.......");
+					sessionObj.getTransaction().rollback();
+					
+				}
+				sqlException.printStackTrace();
+			} finally {
+				if(sessionObj != null) {
+					sessionObj.close();
+				}
+				
+				
+			}
+		
+		
+		
+		
+		return acl;
+		
+	}
+	
 	
 	private String parseNSaveClaim(APIClaim apiClaim) {
 		
