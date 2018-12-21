@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Java+Hibernate Lambda backed APIs for claims web app
+
+Globals:
+  Api:
+    # API Gateway regional endpoints
+    EndpointConfiguration: REGIONAL
+
+Resources:
+  SaveClaimFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: org.octank.claims.oracle.main.ClaimsApiHandler::saveClaim
+      Runtime: java8
+      CodeUri: target/octank-claims-backsync-1.0-SNAPSHOT.jar
+      MemorySize: 1024
+      Role: arn:aws:iam::716664005094:role/microServiceRole
+      Timeout: 120
+      Events:
+        GetResource:
+          Type: Api
+          Properties:
+            Path: /claims
+            Method: POST
+      VpcConfig: # For accessing RDS instance
+        SecurityGroupIds:
+          - sg-0f91a34ea8a021962
+        SubnetIds:
+          - subnet-09801d6354de7c2ae
+          - subnet-0266f93796d5c6e4b
+      Environment:
+        Variables:
+          RDS_HOSTNAME: 20.0.0.136:1521:orcl
+          RDS_DB_NAME: CLAIMS
+          RDS_USERNAME: claims
+          RDS_PASSWORD: claims123
+
+  ListClaimsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: org.octank.claims.oracle.main.ClaimsApiHandler::listClaims
+      Runtime: java8
+      CodeUri: target/octank-claims-backsync-1.0-SNAPSHOT.jar
+      MemorySize: 1024
+      Role: arn:aws:iam::716664005094:role/microServiceRole
+      Timeout: 120
+      Events:
+        GetResource:
+          Type: Api
+          Properties:
+            Path: /claims
+            Method: GET
+      VpcConfig: # For accessing RDS instance
+        SecurityGroupIds:
+          - sg-0f91a34ea8a021962
+        SubnetIds:
+          - subnet-09801d6354de7c2ae
+          - subnet-0266f93796d5c6e4b
+      Environment:
+        Variables:
+          RDS_HOSTNAME: 20.0.0.136:1521:orcl
+          RDS_DB_NAME: CLAIMS
+          RDS_USERNAME: claims
+          RDS_PASSWORD: claims123
+   
+Outputs:
+  OctankClaimsApi:
+    Description: URL for application
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/claims'
+    Export:
+      Name: OctankClaimsApi
+      

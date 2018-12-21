@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Java+Hibernate Lambda backed APIs for claims web app
+Globals:
+  Api:
+    EndpointConfiguration: REGIONAL
+Outputs:
+  OctankClaimsApi:
+    Description: URL for application
+    Export:
+      Name: OctankClaimsApi
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/claims
+Resources:
+  ListClaimsFunction:
+    Properties:
+      CodeUri: s3://octank-healthcare/5af07e30d6ba5d27165267336d387ff6
+      Environment:
+        Variables:
+          RDS_DB_NAME: CLAIMS
+          RDS_HOSTNAME: 20.0.0.136:1521:orcl
+          RDS_PASSWORD: claims123
+          RDS_USERNAME: claims
+      Events:
+        GetResource:
+          Properties:
+            Method: GET
+            Path: /claims
+          Type: Api
+      Handler: org.octank.claims.oracle.main.ClaimsApiHandler::listClaims
+      MemorySize: 1024
+      Role: arn:aws:iam::716664005094:role/microServiceRole
+      Runtime: java8
+      Timeout: 120
+      VpcConfig:
+        SecurityGroupIds:
+        - sg-0f91a34ea8a021962
+        SubnetIds:
+        - subnet-09801d6354de7c2ae
+        - subnet-0266f93796d5c6e4b
+    Type: AWS::Serverless::Function
+  SaveClaimFunction:
+    Properties:
+      CodeUri: s3://octank-healthcare/5af07e30d6ba5d27165267336d387ff6
+      Environment:
+        Variables:
+          RDS_DB_NAME: CLAIMS
+          RDS_HOSTNAME: 20.0.0.136:1521:orcl
+          RDS_PASSWORD: claims123
+          RDS_USERNAME: claims
+      Events:
+        GetResource:
+          Properties:
+            Method: POST
+            Path: /claims
+          Type: Api
+      Handler: org.octank.claims.oracle.main.ClaimsApiHandler::saveClaim
+      MemorySize: 1024
+      Role: arn:aws:iam::716664005094:role/microServiceRole
+      Runtime: java8
+      Timeout: 120
+      VpcConfig:
+        SecurityGroupIds:
+        - sg-0f91a34ea8a021962
+        SubnetIds:
+        - subnet-09801d6354de7c2ae
+        - subnet-0266f93796d5c6e4b
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31

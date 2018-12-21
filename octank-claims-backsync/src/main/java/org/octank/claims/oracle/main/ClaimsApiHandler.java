@@ -72,10 +72,15 @@ public class ClaimsApiHandler implements RequestStreamHandler {
   		 
   		        JSONObject responseBody = new JSONObject();
   		        
-  		      if(claimNbr != null)  
+  		      if(claimNbr != null)  {
   		        responseBody.put("message", "New Claim created with Claim # " +claimNbr);
-  		      else 
+  		        responseBody.put("claimId", claimNbr);
+  		        
+  		      }
+  		      else  {
   		    	  responseBody.put("message", "Claim creation failed");
+  		    	responseBody.put("claimId", "NA");
+  		      }
   		 
   		        JSONObject headerJson = new JSONObject();
   		        headerJson.put("x-custom-header", "my custom header value");
@@ -214,15 +219,17 @@ public class ClaimsApiHandler implements RequestStreamHandler {
 					ac.setMedicalCode(c.getMedicalCode());
 					ac.setUpdatedDate(c.getUpdatedDate());
 					ac.setInsurancePolicyNbr(c.getInsurancePolicyNbr());
-					ac.setInsuranceCompanyId(c.getInsuranceCompany().getInsuranceCompanyId());
+					ac.setInsuranceCompanyId(c.getInsuranceCompany().getInsuranceCompanyName());
 					ac.setGender(c.getPatient().getGender());
 					ac.setPatientAddress(c.getPatient().getPatientAddress());
 					ac.setPatientCity(c.getPatient().getPatientCity());
 					ac.setPatientState(c.getPatient().getPatientState());
+					ac.setPatientZip(c.getPatient().getPatientZip());
 					ac.setPatientCountry(c.getPatient().getPatientCountry());
 					ac.setPatientDateOfBirth(c.getPatient().getDateOfBirth());
 					ac.setPatientName(c.getPatient().getPatientName());
-					ac.setMedicalProviderId(c.getMedicalProvider().getMedicalProviderId());
+					ac.setMedicalProviderId(c.getMedicalProvider().getMedicalProviderName());
+					ac.setStaffId(c.getStaff().getStaffName());
 					
 					
 					acl.add(ac);
@@ -305,8 +312,28 @@ public class ClaimsApiHandler implements RequestStreamHandler {
 					
 					claim.setClaimStatus(apiClaim.getClaimStatus());
 					
-					claim.setUpdatedDate(new Date());
+					claim.setUpdatedDate(apiClaim.getUpdatedDate());
 					claim.setMedicalCode(apiClaim.getMedicalCode());
+					
+					// determine policy nbr
+					
+					System.out.println("Insurnace Co Id-Gender:" + apiClaim.getInsuranceCompanyId() + "-" + apiClaim.getGender());
+					
+					if(apiClaim.getInsuranceCompanyId().equals("IC101")) {
+						if(apiClaim.getGender().equals("Male")) {
+							claim.setInsurancePolicyNbr("IC101-101");
+						} else {
+							claim.setInsurancePolicyNbr("IC101-102");
+						}
+					} else if(apiClaim.getInsuranceCompanyId().equals("IC102")) {
+						if(apiClaim.getGender().equals("Male")) {
+							claim.setInsurancePolicyNbr("IC102-103");
+						} else {
+							claim.setInsurancePolicyNbr("IC102-104");
+						}
+					}
+					
+					
 					
 						
 					System.out.println("saving claim:" +claim.getClaimId());
