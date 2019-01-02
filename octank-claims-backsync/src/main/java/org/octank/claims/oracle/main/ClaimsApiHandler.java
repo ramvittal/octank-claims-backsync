@@ -83,7 +83,7 @@ public class ClaimsApiHandler implements RequestStreamHandler {
   		      }
   		 
   		        JSONObject headerJson = new JSONObject();
-  		        headerJson.put("x-custom-header", "my custom header value");
+  		      headerJson.put("Access-Control-Allow-Origin", "*");
   		 
   		        responseJson.put("statusCode", 200);
   		        responseJson.put("headers", headerJson);
@@ -158,7 +158,7 @@ public class ClaimsApiHandler implements RequestStreamHandler {
 	  		      
 	  		 
 	  		        JSONObject headerJson = new JSONObject();
-	  		        headerJson.put("x-custom-header", "my custom header value");
+	  		        headerJson.put("Access-Control-Allow-Origin", "*");
 	  		 
 	  		        responseJson.put("statusCode", 200);
 	  		        responseJson.put("headers", headerJson);
